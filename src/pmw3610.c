@@ -15,6 +15,10 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(pmw3610, CONFIG_PMW3610_LOG_LEVEL);
 
+#define LED0_NODE DT_ALIAS(led0)
+static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
+
+
 //////// Sensor initialization steps definition //////////
 // init is done in non-blocking manner (i.e., async), a //
 // delayable work is defined for this purpose           //
@@ -709,6 +713,11 @@ static int pmw3610_init(const struct device *dev) {
     k_work_init_delayable(&data->init_work, pmw3610_async_init);
 
     k_work_schedule(&data->init_work, K_MSEC(async_init_delay[data->async_init_step]));
+
+    gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
+    gpio_pin_set_dt(&led, 1);
+    k_msleep(1000);
+
 
     return err;
 }
